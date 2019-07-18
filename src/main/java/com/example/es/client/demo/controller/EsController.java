@@ -1,5 +1,6 @@
 package com.example.es.client.demo.controller;
 
+import com.example.es.client.demo.exception.MyException;
 import com.example.es.client.demo.result.ResultData;
 import com.example.es.client.demo.result.ResultResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * EsController:ES 接口层
@@ -41,14 +40,16 @@ public class EsController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Does the document exists.判断文本时候存在
+        //Does the document exists.判断文本时候存在(就是判断结果)
         if (response.isExists()) {
             return ResultResponse.success("查询成功!", response.getSource());
-
-        } else {
-            return ResultResponse.success("查询成功,但是没有数据!");
         }
+        return ResultResponse.success("查询成功,但是没有数据!");
 
+
+    }
+
+    public static void main(String[] args) {
 
     }
 
