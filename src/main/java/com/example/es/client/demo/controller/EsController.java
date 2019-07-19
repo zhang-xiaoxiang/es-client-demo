@@ -13,6 +13,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,7 @@ import java.util.Map;
  * @date: 2019/07/18
  */
 @RestController
+@RequestMapping
 public class EsController {
     /**
      * Java高级别REST客户端
@@ -62,21 +65,23 @@ public class EsController {
     /**
      * 新增索引
      * 注意查新建这个索引()的时候默认类型是
+     * GET /posts/_doc/1
      *
-     * @param user
      * @return
      */
-    @PostMapping("/posts")
-    public ResultData put(@RequestBody User user) {
+    @PostMapping("/zxx")
+    public ResultData put() throws IOException {
+        System.out.println("-------------");
         //Json字符串作为数据源
         Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("name", user.getName());
-        jsonMap.put("age", user.getName());
-        jsonMap.put("birthDay", new Date());
+        jsonMap.put("name","张晓祥");
+        jsonMap.put("age", "19");
+        jsonMap.put("birthDay","1992-06-12");
         //新增一个文档
         //注意source要的是map
         System.out.println(jsonMap);
-        IndexRequest indexRequest = new IndexRequest("posts").id("1").source(jsonMap);
+        IndexRequest indexRequest = new IndexRequest("posts")
+                .id("1").source(jsonMap);
         try {
             IndexResponse indexResponse1 = client.index(indexRequest, RequestOptions.DEFAULT);
             client.close();
@@ -84,7 +89,7 @@ public class EsController {
             e.printStackTrace();
         }
 
-        return ResultResponse.success("测试新增!", user);
+        return ResultResponse.success("测试新增!",jsonMap );
     }
 
 

@@ -37,15 +37,15 @@ public class DefaultExceptionHandler {
      * @param e 传入处理的异常
      * @return  返回异常作为响应结果给客户端
      */
-    @ExceptionHandler({Exception.class})
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public ResultData allException(Exception e) {
-        ResultData ResultData=new ResultData<>();
-        ResultData.setCode(500);
-        ResultData.setMsg("系统异常(控制层最后的防线)");
-        ResultData.setData(null);
-        return ResultData;
-    }
+//    @ExceptionHandler({Exception.class})
+//    @ResponseStatus(HttpStatus.OK)
+//    @ResponseBody
+//    public ResultData allException(Exception e) {
+//        ResultData ResultData=new ResultData<>();
+//        ResultData.setCode(500);
+//        ResultData.setMsg("系统异常(控制层最后的防线)");
+//        ResultData.setData(null);
+//        return ResultData;
+//    }
 
 }
