@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * EsController:ES 接口层
@@ -35,13 +38,14 @@ public class EsController {
     private EsResponseUtil esResponseUtil;
 
     /**
-     * 根据ID查询索引文档
+     * 查询索引
+     * 根据ID查询索引
      * api按照索引/类型/id书写规范
      * @param esObject
      * @return
      */
     @PostMapping("/test_index/product")
-    public ResultData find(@RequestBody EsObject esObject) {
+    public ResultData get(@RequestBody EsObject esObject) {
         GetRequest getRequest = new GetRequest("test_index", esObject.getId());
         GetResponse documentFields = esResponseUtil.get(getRequest);
         //Does the document exists.判断文本时候存在(就是判断结果)
@@ -51,24 +55,28 @@ public class EsController {
         return ResultResponse.success("查询成功,但是没有数据!");
     }
 
-    @PostMapping("/test_index/product/{id}")
-    public ResultData add(@PathVariable("id") String id) {
-        System.out.println("进入--------------------");
+    /**
+     * 新增索引
+     * @param esObject
+     * @return
+     */
+    @PostMapping("/posts")
+    public ResultData put(@RequestBody EsObject esObject) {
         //Json字符串作为数据源
-        IndexRequest indexRequest1 = new IndexRequest(
-                "test_index");
-        String jsonString = "{" +
-                "\"name\":\"张大仙\"," +
-                "\"mother\":\"蒋美碧\" }";
-        indexRequest1.source(jsonString, XContentType.JSON);
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("user", "kimchy");
+        jsonMap.put("postDate", new Date());
+        jsonMap.put("message", "trying out Elasticsearch");
+        //新增一个文档
+        IndexRequest indexRequest = new IndexRequest("posts").id("1").source(jsonMap);
         try {
-            IndexResponse indexResponse1 = client.index(indexRequest1, RequestOptions.DEFAULT);
+            IndexResponse indexResponse1 = client.index(indexRequest, RequestOptions.DEFAULT);
             client.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return ResultResponse.success("测试新增!");
+        return ResultResponse.success("测试新增!",esObject);
     }
 
 
