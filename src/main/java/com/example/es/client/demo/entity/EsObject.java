@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @date: 2019/07/19
  */
 @Data
-public class EsObject implements Serializable {
+public class EsObject<T> implements Serializable {
     private String index;
     private String type;
     private String id;
@@ -19,5 +19,5 @@ public class EsObject implements Serializable {
     private String seqNo;
     private String primaryTerm;
     private Boolean found;
-    private Object source;
+    private T source;
 }

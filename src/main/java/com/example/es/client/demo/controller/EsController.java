@@ -1,6 +1,9 @@
 package com.example.es.client.demo.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example.es.client.demo.entity.EsObject;
+import com.example.es.client.demo.entity.User;
 import com.example.es.client.demo.result.ResultData;
 import com.example.es.client.demo.result.ResultResponse;
 import com.example.es.client.demo.util.EsResponseUtil;
@@ -41,6 +44,7 @@ public class EsController {
      * 查询索引
      * 根据ID查询索引
      * api按照索引/类型/id书写规范
+     *
      * @param esObject
      * @return
      */
@@ -57,17 +61,21 @@ public class EsController {
 
     /**
      * 新增索引
-     * @param esObject
+     * 注意查新建这个索引()的时候默认类型是
+     *
+     * @param user
      * @return
      */
     @PostMapping("/posts")
-    public ResultData put(@RequestBody EsObject esObject) {
+    public ResultData put(@RequestBody User user) {
         //Json字符串作为数据源
         Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("user", "kimchy");
-        jsonMap.put("postDate", new Date());
-        jsonMap.put("message", "trying out Elasticsearch");
+        jsonMap.put("name", user.getName());
+        jsonMap.put("age", user.getName());
+        jsonMap.put("birthDay", new Date());
         //新增一个文档
+        //注意source要的是map
+        System.out.println(jsonMap);
         IndexRequest indexRequest = new IndexRequest("posts").id("1").source(jsonMap);
         try {
             IndexResponse indexResponse1 = client.index(indexRequest, RequestOptions.DEFAULT);
@@ -76,12 +84,8 @@ public class EsController {
             e.printStackTrace();
         }
 
-        return ResultResponse.success("测试新增!",esObject);
+        return ResultResponse.success("测试新增!", user);
     }
-
-
-
-
 
 
 }
