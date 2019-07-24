@@ -8,6 +8,8 @@ import com.example.es.client.demo.service.UserService;
 import com.example.es.client.demo.util.MapUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -256,5 +258,41 @@ public class UserServiceImpl implements UserService {
         }
 
 
+    }
+
+    /**
+     * 删除用户
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public GetResponse delUser(User user) {
+
+        try {
+            //索引   以及id
+            DeleteRequest request = new DeleteRequest("posts", "1");
+            DeleteResponse deleteResponse = client.delete(request, RequestOptions.DEFAULT);
+
+            //异步删除
+            //client.deleteAsync(request, RequestOptions.DEFAULT, listener);
+
+            String index = deleteResponse.getIndex();
+            String id = deleteResponse.getId();
+            long version = deleteResponse.getVersion();
+            ReplicationResponse.ShardInfo shardInfo = deleteResponse.getShardInfo();
+            if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
+
+            }
+            if (shardInfo.getFailed() > 0) {
+                for (ReplicationResponse.ShardInfo.Failure failure :
+                        shardInfo.getFailures()) {
+                    String reason = failure.reason();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

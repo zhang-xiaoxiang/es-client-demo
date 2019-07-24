@@ -1,10 +1,8 @@
 package com.example.es.client.demo.service;
 
-import com.example.es.client.demo.entity.EsObject;
 import com.example.es.client.demo.entity.User;
 import org.elasticsearch.action.get.GetResponse;
 
-import javax.jws.soap.SOAPBinding;
 
 
 /**
@@ -51,5 +49,12 @@ public interface UserService {
      * @return
      */
     GetResponse getUser(User user);
+
+    /**
+     * 删除用户
+     * @param user
+     * @return
+     */
+    GetResponse delUser(User user);
 
 }
