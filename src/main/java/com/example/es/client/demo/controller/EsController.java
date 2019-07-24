@@ -1,28 +1,16 @@
 package com.example.es.client.demo.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.example.es.client.demo.entity.EsObject;
 import com.example.es.client.demo.entity.User;
 import com.example.es.client.demo.result.ResultData;
 import com.example.es.client.demo.result.ResultResponse;
-import com.example.es.client.demo.util.EsResponseUtil;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.common.xcontent.XContentType;
+import com.example.es.client.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * EsController:ES 接口层
@@ -31,17 +19,10 @@ import java.util.Map;
  * @date: 2019/07/18
  */
 @RestController
-@RequestMapping
+@RequestMapping("/user")
 public class EsController {
-    /**
-     * Java高级别REST客户端
-     */
     @Autowired
-    private RestHighLevelClient client;
-    @Autowired
-    private ResultData resultData;
-    @Autowired
-    private EsResponseUtil esResponseUtil;
+    private UserService userService;
 
     /**
      * 查询索引
@@ -51,45 +32,36 @@ public class EsController {
      * @param esObject
      * @return
      */
-    @PostMapping("/test_index/product")
+    @PostMapping("/select-index")
     public ResultData get(@RequestBody EsObject esObject) {
-        GetRequest getRequest = new GetRequest("test_index", esObject.getId());
-        GetResponse documentFields = esResponseUtil.get(getRequest);
-        //Does the document exists.判断文本时候存在(就是判断结果)
-        if (documentFields.isExists()) {
-            return ResultResponse.success("查询成功!", documentFields.getSource());
-        }
-        return ResultResponse.success("查询成功,但是没有数据!");
+        // GetRequest getRequest = new GetRequest("test_index", esObject.getId());
+        // GetResponse documentFields = esResponseUtil.get(getRequest);
+        // //Does the document exists.判断文本时候存在(就是判断结果)
+        // if (documentFields.isExists()) {
+        //     return ResultResponse.success("查询成功!", documentFields.getSource());
+        // }
+        // return ResultResponse.success("查询成功,但是没有数据!");
+        return null;
     }
 
     /**
-     * 新增索引
-     * 注意查新建这个索引()的时候默认类型是
-     * GET /posts/_doc/1
+     * 新增索引,注意新版本默认type为_doc
+     *
+     * 3种方式
      *
      * @return
      */
-    @PostMapping("/zxx")
-    public ResultData put() throws IOException {
-        System.out.println("-------------");
-        //Json字符串作为数据源
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("name","张晓祥");
-        jsonMap.put("age", "19");
-        jsonMap.put("birthDay","1992-06-12");
-        //新增一个文档
-        //注意source要的是map
-        System.out.println(jsonMap);
-        IndexRequest indexRequest = new IndexRequest("posts")
-                .id("1").source(jsonMap);
-        try {
-            IndexResponse indexResponse1 = client.index(indexRequest, RequestOptions.DEFAULT);
-            client.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @RequestMapping("/add-index")
+    public ResultData putByMap(@RequestBody User user) {
 
-        return ResultResponse.success("测试新增!",jsonMap );
+        // User user1 = userService.addUser(user);
+        //User user1 = userService.addUser2(user);
+        // User user1 = userService.addUser3(user);
+         User user1 = userService.addUser4(user);
+        if (user1 == null) {
+            return ResultResponse.failure("添加用户失败!");
+        }
+        return ResultResponse.success("测试新增!", user1);
     }
 
 
