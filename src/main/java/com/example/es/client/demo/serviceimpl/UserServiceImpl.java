@@ -1,6 +1,7 @@
 package com.example.es.client.demo.serviceimpl;
 
 import com.alibaba.fastjson.JSON;
+import com.example.es.client.demo.entity.EsObject;
 import com.example.es.client.demo.entity.User;
 import com.example.es.client.demo.result.ResultData;
 import com.example.es.client.demo.service.UserService;
@@ -213,7 +214,8 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public User getUser(User user) {
+    public GetResponse getUser(User user) {
+        EsObject<Object> esObject=new EsObject<>();
         try {
             //GetRequest()方法第一个参数是索引的名字,第二个参数是文档的id
             GetRequest getRequest = new GetRequest("user", "1");
@@ -228,6 +230,8 @@ public class UserServiceImpl implements UserService {
             GetResponse getResponse = null;
             getResponse = client.get(getRequest, RequestOptions.DEFAULT);
             System.out.println("查询结果:  "+getResponse);
+            //给自己封装的复制
+            esObject.setSource(getResponse.getSource());
             String index = getResponse.getIndex();
             String id = getResponse.getId();
             if (getResponse.isExists()) {
@@ -245,7 +249,7 @@ public class UserServiceImpl implements UserService {
                 // 处理没有找到文档的场景。注意，虽然返回的响应有404状态代码，但是返回的是有效的GetResponse，
                 // 而不是抛出异常。这样的响应不包含任何源文档，并且它的isExists方法返回     }
             }
-            return user;
+            return getResponse;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

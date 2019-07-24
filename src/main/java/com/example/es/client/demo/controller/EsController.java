@@ -5,6 +5,7 @@ import com.example.es.client.demo.result.ResultData;
 import com.example.es.client.demo.result.ResultResponse;
 import com.example.es.client.demo.service.UserService;
 
+import org.elasticsearch.action.get.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,11 +36,12 @@ public class EsController {
      */
     @PostMapping("/get-index")
     public ResultData get(@RequestBody User user) {
-        User user1 = userService.getUser(user);
-        if (user1 == null) {
+        GetResponse getResponse = userService.getUser(user);
+        if (getResponse == null) {
             return ResultResponse.failure("查询失败!");
         }
-        return ResultResponse.success("查询成功!", user1);
+        //返回想要的
+        return ResultResponse.success("查询成功!", getResponse.getSourceAsMap());
     }
 
     /**
