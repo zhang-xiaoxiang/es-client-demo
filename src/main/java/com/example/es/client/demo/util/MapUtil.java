@@ -153,7 +153,7 @@ public class MapUtil {
         User user=new User();
         user.setName("zxx");
         user.setAge(12);
-        user.setBirthDay(new Date());
+        user.setBirthday(new Date());
         Map<String, String> map = beanToMap(user);
         System.out.println(map);
 

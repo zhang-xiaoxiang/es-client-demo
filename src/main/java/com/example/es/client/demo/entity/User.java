@@ -16,8 +16,9 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 public class User implements Serializable {
+    private String userId;
     private String name;
     private Integer age;
-    private Date birthDay;
+    private Date birthday;
 
 }

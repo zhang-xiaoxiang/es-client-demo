@@ -2,6 +2,8 @@ package com.example.es.client.demo.service;
 
 import com.example.es.client.demo.entity.User;
 
+import javax.jws.soap.SOAPBinding;
+
 
 /**
  * UserService:用户服务层
@@ -40,5 +42,12 @@ public interface UserService {
      * @return
      */
     User addUser4(User user);
+
+    /**
+     * 获取(查询)用户
+     * @param user
+     * @return
+     */
+    User getUser(User user);
 
 }
