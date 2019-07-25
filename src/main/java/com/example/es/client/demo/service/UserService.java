@@ -3,7 +3,8 @@ package com.example.es.client.demo.service;
 import com.example.es.client.demo.entity.User;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
-
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 
 
 /**
@@ -52,11 +53,25 @@ public interface UserService {
     GetResponse getUser(User user);
 
     /**
-     * 删除用户
+     * 删除用户--同步方式
      * @param user
      * @return
      */
     DeleteResponse delUser(User user);
+
+    /**
+     * 删除用户--异步方式
+     * @param user
+     * @return  1标识为成功删除,0标识失败
+     */
+    Integer delUserByAsy(User user);
+
+    /**
+     * 更新用户(索引)
+     * @param user
+     * @return ES返回的更新对象
+     */
+    UpdateResponse updUser(User user);
 
 
 

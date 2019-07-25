@@ -20,12 +20,18 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.get.GetResult;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +40,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * UserServiceImpl:实现类
@@ -280,9 +288,8 @@ public class UserServiceImpl implements UserService {
         try {
             //同步删除 索引   以及id
             DeleteRequest request = new DeleteRequest("user", user.getUserId());
-            DeleteResponse deleteResponse = null;
-            deleteResponse = client.delete(request, RequestOptions.DEFAULT);
-            System.out.println("执行删除ES返回: "+deleteResponse);
+            DeleteResponse deleteResponse = client.delete(request, RequestOptions.DEFAULT);
+            System.out.println("执行删除ES返回: " + deleteResponse);
             String index = deleteResponse.getIndex();
             String id = deleteResponse.getId();
             long version = deleteResponse.getVersion();
@@ -299,18 +306,6 @@ public class UserServiceImpl implements UserService {
                 }
             }
 
-            //异步删除
-/*            ActionListener<DeleteResponse> listener = new ActionListener<DeleteResponse>() {
-                @Override
-                public void onResponse(DeleteResponse deleteResponse) {
-                    System.out.println("删除成功!");
-                }
-
-                @Override
-                public void onFailure(Exception e) {
-                }
-            };
-            client.deleteAsync(request, RequestOptions.DEFAULT, listener);*/
 
             return deleteResponse;
         } catch (Exception e) {
@@ -318,5 +313,83 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
+    }
+
+    /**
+     * 删除用户--异步方式
+     *
+     * @param user
+     * @return 1标识为成功删除, 0标识失败
+     */
+    @Override
+    public Integer delUserByAsy(User user) {
+        //异步删除
+        DeleteRequest request = new DeleteRequest("user", user.getUserId());
+        ActionListener<DeleteResponse> listener = new ActionListener<DeleteResponse>() {
+
+            @Override
+            public void onResponse(DeleteResponse deleteResponse) {
+                System.out.println("异步删除成功(的处理)!");
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                System.out.println("异步删除失败的处理!");
+            }
+        };
+        try {
+            client.deleteAsync(request, RequestOptions.DEFAULT, listener);
+            return 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+
+    }
+
+
+    /**
+     * 更新用户(索引)--用法很多,更新参数和添加参数类似,map,string等
+     *
+     * @param user
+     * @return ES返回的更新对象
+     */
+    @Override
+    public UpdateResponse updUser(User user) {
+        try {
+
+            //json更加好
+            Object o = JSON.toJSON(user);
+            UpdateRequest request = new UpdateRequest("user", user.getUserId());
+            request.doc(o.toString(), XContentType.JSON);
+
+            //可以执行很多可选参数....,这里是个简单示例,就不把官方文档的所有的可选参数都添加上了
+            //同步执行
+            UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
+            String index = updateResponse.getIndex();
+            String id = updateResponse.getId();
+            long version = updateResponse.getVersion();
+            if (updateResponse.getResult() == DocWriteResponse.Result.CREATED) {
+                System.out.println("处理第一次创建文档的案例(upert)");
+                System.out.println("ES返回的updateResponse " + updateResponse);
+                return  updateResponse;
+            } else if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED) {
+                System.out.println("处理文档更新的案例");
+                return  updateResponse;
+            } else if (updateResponse.getResult() == DocWriteResponse.Result.DELETED) {
+                System.out.println("处理文档被删除的情况");
+            } else if (updateResponse.getResult() == DocWriteResponse.Result.NOOP) {
+                System.out.println("处理文档未受更新影响的情况(未对文档执行任何操作(Noop)。");
+            }
+
+            System.out.println("ES返回的updateResponse " + updateResponse);
+
+
+            //其他健壮性处理......
+            return  updateResponse;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
