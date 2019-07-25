@@ -1,6 +1,5 @@
 package com.example.es.client.demo.config;
 
-import com.google.gson.Gson;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;

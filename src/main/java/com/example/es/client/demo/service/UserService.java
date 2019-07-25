@@ -1,6 +1,7 @@
 package com.example.es.client.demo.service;
 
 import com.example.es.client.demo.entity.User;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 
 
@@ -55,6 +56,8 @@ public interface UserService {
      * @param user
      * @return
      */
-    GetResponse delUser(User user);
+    DeleteResponse delUser(User user);
+
+
 
 }

@@ -7,6 +7,10 @@ import com.example.es.client.demo.result.ResultData;
 import com.example.es.client.demo.service.UserService;
 import com.example.es.client.demo.util.MapUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -14,9 +18,11 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -61,7 +67,7 @@ public class UserServiceImpl implements UserService {
             log.warn("方式1--------------------------------------------------------------------------------");
             //Json字符串作为数据源
             Map<String, Object> jsonMap = new HashMap<>();
-            jsonMap.put("userId","001");
+            jsonMap.put("userId", "001");
             jsonMap.put("name", user.getName());
             jsonMap.put("age", user.getAge());
             jsonMap.put("birthday", new Date());
@@ -105,7 +111,6 @@ public class UserServiceImpl implements UserService {
             indexRequest.source(o.toString(), XContentType.JSON);
             //同步执行
             IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
-            client.close();
             return user;
         } catch (IOException e) {
             e.printStackTrace();
@@ -218,7 +223,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public GetResponse getUser(User user) {
-        EsObject<Object> esObject=new EsObject<>();
+        EsObject<Object> esObject = new EsObject<>();
         try {
             //GetRequest()方法第一个参数是索引的名字,第二个参数是文档的id
             GetRequest getRequest = new GetRequest("user", "1");
@@ -232,7 +237,7 @@ public class UserServiceImpl implements UserService {
             getRequest.storedFields("name");
             GetResponse getResponse = null;
             getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-            System.out.println("查询结果:  "+getResponse);
+            System.out.println("查询结果:  " + getResponse);
             //给自己封装的复制
             esObject.setSource(getResponse.getSource());
             String index = getResponse.getIndex();
@@ -246,7 +251,7 @@ public class UserServiceImpl implements UserService {
 
                 // 获取结果集中某个字段的数据
                 String message = (String) getResponse.getSource().get("name");
-                System.out.println("获取name结果:  "+message);
+                System.out.println("获取name结果:  " + message);
             } else {
 
                 // 处理没有找到文档的场景。注意，虽然返回的响应有404状态代码，但是返回的是有效的GetResponse，
@@ -263,40 +268,55 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 删除用户
+     * 报错Request cannot be executed; I/O reactor status: STOPPED
+     * 这个的一般原因是，在执行客户端的时候 client.close();曾经被执行过
      *
      * @param user
      * @return
      */
     @Override
-    public GetResponse delUser(User user) {
+    public DeleteResponse delUser(User user) {
 
         try {
             //同步删除 索引   以及id
             DeleteRequest request = new DeleteRequest("user", user.getUserId());
-            DeleteResponse deleteResponse = client.delete(request, RequestOptions.DEFAULT);
-
-            //异步删除
-            //client.deleteAsync(request, RequestOptions.DEFAULT, listener);
-
-
+            DeleteResponse deleteResponse = null;
+            deleteResponse = client.delete(request, RequestOptions.DEFAULT);
+            System.out.println("执行删除ES返回: "+deleteResponse);
             String index = deleteResponse.getIndex();
             String id = deleteResponse.getId();
             long version = deleteResponse.getVersion();
             ReplicationResponse.ShardInfo shardInfo = deleteResponse.getShardInfo();
-            // 写入应该去的碎片总数 !=  写入成功的碎片总数
+
             if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-                System.out.println("shardInfo.getTotal() != shardInfo.getSuccessful()");
+                System.out.println("处理成功碎片的数量少于总碎片的情况");
             }
             //The total number of replication failures 复制失败的总数
             if (shardInfo.getFailed() > 0) {
+                System.out.println(" 处理潜在的故障");
                 for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
                     String reason = failure.reason();
                 }
             }
-            System.out.println("删除成功!");
-        } catch (IOException e) {
+
+            //异步删除
+/*            ActionListener<DeleteResponse> listener = new ActionListener<DeleteResponse>() {
+                @Override
+                public void onResponse(DeleteResponse deleteResponse) {
+                    System.out.println("删除成功!");
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                }
+            };
+            client.deleteAsync(request, RequestOptions.DEFAULT, listener);*/
+
+            return deleteResponse;
+        } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
+
     }
 }

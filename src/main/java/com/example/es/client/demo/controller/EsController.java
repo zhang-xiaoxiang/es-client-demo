@@ -5,13 +5,13 @@ import com.example.es.client.demo.result.ResultData;
 import com.example.es.client.demo.result.ResultResponse;
 import com.example.es.client.demo.service.UserService;
 
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 
 
 /**
@@ -46,14 +46,14 @@ public class EsController {
 
     /**
      * 新增索引,注意新版本默认type为_doc
-     *
+     * <p>
      * 4种方式(萝卜青菜各有所爱)
      *
      * @return
      */
     @RequestMapping("/add-index")
     public ResultData putByMap(@RequestBody User user) {
-         User user1 = userService.addUser2(user);
+        User user1 = userService.addUser2(user);
         if (user1 == null) {
             return ResultResponse.failure("添加用户失败!");
         }
@@ -62,18 +62,28 @@ public class EsController {
 
     /**
      * 新增索引,注意新版本默认type为_doc
-     *
+     * <p>
      * 4种方式(萝卜青菜各有所爱)
      *
      * @return
      */
     @RequestMapping("/del-index")
     public ResultData delIndex(@RequestBody User user) {
-        GetResponse getResponse = userService.delUser(user);
-        if (getResponse == null) {
+        DeleteResponse deleteResponse = null;
+        try {
+            deleteResponse = userService.delUser(user);
+            if (deleteResponse.getShardInfo().getSuccessful() > 0) {
+                //需要返回的信息在deleteResponse对象里面找
+                return ResultResponse.success("删除成功!", "ES主键: "+deleteResponse.getId()+"  ES索引:"+deleteResponse.getShardId().getIndexName());
+            }
+
+            return ResultResponse.failure("删除用户失败!");
+
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResultResponse.failure("删除用户失败!");
         }
-        return ResultResponse.success("删除成功!", getResponse);
+
     }
 
 }
