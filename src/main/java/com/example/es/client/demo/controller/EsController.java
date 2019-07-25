@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * EsController:ES 接口层
+ * 参考官方7.2给出的API
+ * https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-supported-apis.html
+ * 网友的参考
+ * https://blog.csdn.net/zhangshng/article/details/95946596
+ *
  *
  * @author zhangxiaoxiang
  * @date: 2019/07/18
@@ -74,7 +79,8 @@ public class EsController {
             deleteResponse = userService.delUser(user);
             if (deleteResponse.getShardInfo().getSuccessful() > 0) {
                 //需要返回的信息在deleteResponse对象里面找
-                return ResultResponse.success("删除成功!", "ES主键: " + deleteResponse.getId() + "  ES索引:" + deleteResponse.getShardId().getIndexName());
+                return ResultResponse.success("删除成功!", "ES主键: " +
+                        deleteResponse.getId() + "  ES索引:" + deleteResponse.getShardId().getIndexName());
             }
 
             return ResultResponse.failure("删除用户失败!");
