@@ -1,16 +1,9 @@
 package com.example.es.client.demo.util;
 
 import com.example.es.client.demo.entity.User;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +21,7 @@ public class MapUtil {
 
     /**
      * 利用反射将map集合封装成bean对象
+     *
      * @param map
      * @param clazz
      * @param <T>
@@ -45,7 +39,7 @@ public class MapUtil {
                 String setMethodName = "set" + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
                 //获取和map的key匹配的属性名称
                 Field field = getClassField(clazz, propertyName);
-                if (field == null){
+                if (field == null) {
                     continue;
                 }
                 Class<?> fieldTypeClass = field.getType();
@@ -62,6 +56,7 @@ public class MapUtil {
 
     /**
      * 根据给定对象类匹配对象中的特定字段
+     *
      * @param clazz
      * @param fieldName
      * @return
@@ -87,6 +82,7 @@ public class MapUtil {
 
     /**
      * 将map的value值转为实体类中字段类型匹配的方法
+     *
      * @param value
      * @param fieldTypeClass
      * @return
@@ -114,6 +110,7 @@ public class MapUtil {
 
     /**
      * bean转map
+     *
      * @param obj
      * @return
      */
@@ -150,7 +147,7 @@ public class MapUtil {
 
     public static void main(String[] args) throws Exception {
         Map<String, Object> jsonMap = new HashMap<>();
-        User user=new User();
+        User user = new User();
         user.setName("zxx");
         user.setAge(12);
         user.setBirthday(new Date());

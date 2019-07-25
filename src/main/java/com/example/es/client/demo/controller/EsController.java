@@ -60,5 +60,20 @@ public class EsController {
         return ResultResponse.success("新增成功!", user1);
     }
 
+    /**
+     * 新增索引,注意新版本默认type为_doc
+     *
+     * 4种方式(萝卜青菜各有所爱)
+     *
+     * @return
+     */
+    @RequestMapping("/del-index")
+    public ResultData delIndex(@RequestBody User user) {
+        GetResponse getResponse = userService.delUser(user);
+        if (getResponse == null) {
+            return ResultResponse.failure("删除用户失败!");
+        }
+        return ResultResponse.success("删除成功!", getResponse);
+    }
 
 }

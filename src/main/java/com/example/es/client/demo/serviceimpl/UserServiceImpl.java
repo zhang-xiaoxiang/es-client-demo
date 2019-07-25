@@ -92,7 +92,8 @@ public class UserServiceImpl implements UserService {
 
         try {
             IndexRequest indexRequest = new IndexRequest("user");
-            indexRequest.id("2");
+            //直接使用用户主键作为index的哈哈
+            indexRequest.id(user.getUserId());
             Object o = JSON.toJSON(user);
             System.out.println(o.toString());
             //或者下面的形式
@@ -270,26 +271,29 @@ public class UserServiceImpl implements UserService {
     public GetResponse delUser(User user) {
 
         try {
-            //索引   以及id
-            DeleteRequest request = new DeleteRequest("posts", "1");
+            //同步删除 索引   以及id
+            DeleteRequest request = new DeleteRequest("user", user.getUserId());
             DeleteResponse deleteResponse = client.delete(request, RequestOptions.DEFAULT);
 
             //异步删除
             //client.deleteAsync(request, RequestOptions.DEFAULT, listener);
 
+
             String index = deleteResponse.getIndex();
             String id = deleteResponse.getId();
             long version = deleteResponse.getVersion();
             ReplicationResponse.ShardInfo shardInfo = deleteResponse.getShardInfo();
+            // 写入应该去的碎片总数 !=  写入成功的碎片总数
             if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-
+                System.out.println("shardInfo.getTotal() != shardInfo.getSuccessful()");
             }
+            //The total number of replication failures 复制失败的总数
             if (shardInfo.getFailed() > 0) {
-                for (ReplicationResponse.ShardInfo.Failure failure :
-                        shardInfo.getFailures()) {
+                for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
                     String reason = failure.reason();
                 }
             }
+            System.out.println("删除成功!");
         } catch (IOException e) {
             e.printStackTrace();
         }
